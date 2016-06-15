@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import numpy.testing
-from topord_estimator.estimate import distance, TopordTPA, precedes, swap
+from topord_estimator.estimate import distance, TopordTPA, precedes, swap, g_func
 import igraph
 import pytest
 
@@ -43,25 +43,26 @@ def test_generate(g):
 
 
 def test_precedes(g):
-    assert not precedes(g, -1, -1)
-    assert not precedes(g, 5, -1)
-    assert precedes(g, 0, 1)
-    assert precedes(g, 2, 9)
-    assert not precedes(g, 9, 2)
-    assert not precedes(g, 5, 6)
+    assert not precedes(g, 12, 12, 12)
+    assert not precedes(g, 5, 12, 12)
+    assert precedes(g, 0, 1, 12)
+    assert precedes(g, 2, 9, 12)
+    assert not precedes(g, 9, 2, 12)
+    assert not precedes(g, 5, 6, 12)
 
 
 def test_swap():
     a = np.arange(4)
-    swap(a, 0, 1)
+    a = swap(a, 0, 1)
     numpy.testing.assert_array_equal(a, np.array([1, 0, 2, 3]))
-    swap(a, 1, 3)
+    a = swap(a, 1, 3)
     numpy.testing.assert_array_equal(a, np.array([1, 3, 2, 0]))
 
 
 def test_sigma_home(g):
     tpa = TopordTPA(g)
     assert is_precedence_feasible(g, tpa.sigma_home)
+
 
 def test_get_uniform(g):
     tpa = TopordTPA(g)
@@ -70,3 +71,8 @@ def test_get_uniform(g):
     assert distance(X, tpa.sigma_home) < tpa.n
 
 
+def test_g_func():
+    x_star = np.array([4, 1, 0, 4])
+    sigma_home = np.array([0, 1, 2, 3])
+    g_x_star = g_func(x_star, 4, sigma_home)
+    numpy.testing.assert_array_equal(np.array([4, 1, 0, 2]), g_x_star)
